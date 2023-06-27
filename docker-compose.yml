@@ -1,0 +1,33 @@
+version: '3.6'
+services:
+  nginx:
+    image: nginx:1.13
+    restart: always
+    ports:
+      - '80:80'
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - app
+
+  app:
+    build: .
+    env_file: configuration.env
+    depends_on:
+      - mongodb
+    ports:
+      - '8080:8080'
+
+  mongodb:
+    image: mongo:6-jammy
+    ports:
+      - '27017:27017'
+    volumes:
+      - db:/data/db
+
+
+volumes:
+  db: {}
+  grafana_data: {}
+  influxdb_data: {}
+
