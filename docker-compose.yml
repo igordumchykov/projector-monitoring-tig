@@ -9,8 +9,6 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d
     depends_on:
       - app
-    networks:
-      - docker_network
 
   app:
     build: .
@@ -18,10 +16,10 @@ services:
     depends_on:
       - mongodb
       - telegraf
+      - elasticsearch
+      - logstash
     ports:
       - '8080:8080'
-    networks:
-      - docker_network
 
   mongodb:
     image: mongo:6-jammy
@@ -29,8 +27,6 @@ services:
       - '27017:27017'
     volumes:
       - db:/data/db
-    networks:
-      - docker_network
 
   telegraf:
     image: telegraf:1.25-alpine
@@ -39,10 +35,9 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - influxdb
+      - elasticsearch
     ports:
       - '127.0.0.1:8125:8125/udp'
-    networks:
-      - docker_network
 
   influxdb:
     image: influxdb:1.8-alpine
@@ -52,13 +47,12 @@ services:
     volumes:
       - ./:/imports
       - influxdb_data:/var/lib/influxdb
-    networks:
-      - docker_network
 
   grafana:
     image: grafana/grafana:8.0.2
     depends_on:
       - influxdb
+      - elasticsearch
     env_file: configuration.env
     ports:
       - '127.0.0.1:3000:3000'
@@ -66,14 +60,33 @@ services:
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning/:/etc/grafana/provisioning/
       - ./grafana/dashboards/:/var/lib/grafana/dashboards/
-    networks:
-      - docker_network
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.0
+    environment:
+      - xpack.security.enabled=false
+      - "discovery.type=single-node"
+    volumes:
+      - elasticsearch_data:/var/lib/elasticsearch/data
+    ports:
+      - '9200:9200'
+      - '9300:9300'
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.15.0
+    volumes:
+      - ./logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
+      - logstash_data:/usr/share/logstash/data
+    depends_on:
+      - elasticsearch
+    ports:
+      - '5044:5044'
+    environment:
+      - LOGSTASH_JAVA_OPTS=-Xmx256m -Xms256m
 
 volumes:
   db: {}
   grafana_data: {}
   influxdb_data: {}
-
-networks:
-  docker_network:
-    driver: bridge
+  elasticsearch_data: {}
+  logstash_data: {}

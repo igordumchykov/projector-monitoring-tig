@@ -9,6 +9,8 @@ logging:
     io.micrometer: DEBUG
 spring:
   data:
+    elasticsearch:
+      cluster-nodes: elasticsearch:9200
     mongodb:
       uri: ${MONGODB_URL}
       database: ${MONGODB_NAME}
