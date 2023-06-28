@@ -6,6 +6,7 @@ logging:
     com.jdum.projector.monitoring: DEBUG
     org.springframework: INFO
     org.mongodb: ERROR
+    io.micrometer: DEBUG
 spring:
   data:
     mongodb:
@@ -19,9 +20,18 @@ spring:
       additional-exclude: static/**
     livereload:
       enabled: true
+
 management:
+  statsd:
+    metrics:
+      export:
+        enabled: true
+        flavor: TELEGRAF
+        port: 8125
+        host: telegraf
+        protocol: udp
   endpoints:
     web:
       base-path: /management
       exposure:
-        include: [ 'configprops', 'env', 'health', 'info', 'jhimetrics', 'logfile', 'loggers', 'threaddump', 'caches' ]
+        include: [ 'configprops', 'env', 'health', 'info', 'metrics', 'logfile', 'loggers', 'threaddump', 'caches' ]

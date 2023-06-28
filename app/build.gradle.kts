@@ -32,6 +32,8 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.zalando:problem-spring-web:0.27.0")
+    implementation("io.micrometer:micrometer-registry-statsd:1.11.1")
+    implementation("io.micrometer:micrometer-core:1.11.1")
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
